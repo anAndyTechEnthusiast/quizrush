@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="zh">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>智力闯关游戏</title>
+    <link rel="icon" type="image/x-icon" href="/static1/favicon.ico">
+
+
+    <!-- 排行榜系统 -->
+    <script src="/static/js/leaderboard.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.2.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@v2.0.0/particles.min.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+
+</head>
+
+<body>
+    <div id="particles-js"></div>
+    <script>
+        var particlesConfig = {
+            particles: {
+                number: { value: 80, density: { enable: true, value_area: 800 } },
+                color: { value: "#ffffff" },
+                shape: { type: "circle" },
+                opacity: { value: 0.5, random: true },
+                size: { value: 3, random: true },
+                line_linked: {
+                    enable: true,
+                    distance: 150,
+                    color: "#ffffff",
+                    opacity: 0.4,
+                    width: 1
+                },
+                move: {
+                    enable: true,
+                    speed: 2,
+                    direction: "none",
+                    random: false,
+                    straight: false,
+                    out_mode: "out"
+                }
+            },
+            interactivity: {
+                detect_on: "canvas",
+                events: {
+                    onhover: { enable: true, mode: "repulse" },
+                    onclick: { enable: true, mode: "push" },
+                    resize: true
+                }
+            }
+        };
+
+        particlesJS('particles-js', particlesConfig);
+    </script>
+
+
+
+    <div class="container">
+        <h1>智力闯关游戏</h1>
+
+
+        <div id="userContainer" style="margin-bottom: 20px;">
+            <!-- 游客面板 -->
+            <div id="guestPanel">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <input type="text" id="loginUsername" placeholder="用户名"
+                        style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                    <input type="password" id="loginPassword" placeholder="密码"
+                        style="padding: 8px; border-radius: 4px; border: 1px solid #ccc;">
+                    <button onclick="login()" class="small">登录</button>
+                    <button onclick="showRegister()" class="small">注册</button>
+                </div>
+            </div>
+            <!-- 修改：登录后的面板用loggedInPanel -->
+            <div id="loggedInPanel" style="display: none;">
+                <span>欢迎, <span id="currentUsername"></span>!</span>
+                <button onclick="logout()" class="small" style="margin-left: 10px;">退出</button>
+                <!-- 管理员按钮放在退出按钮右边 -->
+                <button id="adminIcon" onclick="showAdminPanel()" class="small"
+                    style="display: none; margin-left: 10px;">🔧 管理</button>
+            </div>
+
+        </div>
+
+
+        <!-- 玩法说明（移动到标题和排行榜下方，分数和题目区上方） -->
+        <div class="rules">
+            <strong>玩法说明（重要）</strong>
+            <ul>
+                <li>数学题限时 40 秒，选择题限时 15 秒。绿色进度条显示剩余秒数。</li>
+                <li>答对得分 = 当前连对数；答错扣分 = -(2 × 连错数 - 1)。</li>
+                <li>右上角的数据为历史最高单项记录</li>
+                <li>冷却规则：连续答错/超时 3 题 或 累计答错/超时 5 题 进入冷却（15 秒）。红色进度条显示冷却倒计时。</li>
+                <li>正常数学题输入数字或算式。文言文数学题请输入汉字数字+单位（如二十五步有奇）。</li>
+                <li>选择题请点击选项按钮（只有一个为正确答案）。</li>
+                <li>分数到100分时，难度可以提升；分数到200分时，难度允许再次提升。分数到300分时，难度将达到最大。</li>
+                <li>键盘操作：回车提交/继续/开始，↑↓或W/S选择，数字键1-5快速选择。</li>
+            </ul>
+        </div>
+
+        <!-- 答题区域（恢复原始结构与类名，保持样式兼容） -->
+        <div class="stats"
+            style="display:grid; grid-template-columns: repeat(2, 1fr); gap:8px; margin-bottom:14px; font-size:14px;">
+            <div class="stat">分数: <span id="score">0</span></div>
+            <div class="stat">等级: <span id="level">Lv.0</span></div>
+            <div class="stat">连对: <span id="streak">0</span></div>
+            <div class="stat">连错: <span id="mistake">0</span></div>
+            <div class="stat">已答: <span id="answered">0</span></div>
+            <div class="stat">总答对: <span id="totalCorrect">0</span></div>
+            <div class="stat">总答错: <span id="totalWrongOverall">0</span></div>
+            <div class="stat">正确率: <span id="accuracy">0.0%</span></div>
+        </div>
+
+        <!-- 只保留这个正常的题目区域 -->
+        <div class="question" id="question">点击开始答题</div>
+
+        <div class="options" id="options"></div>
+
+        <div id="mathInput" style="display:none">
+            <input id="answerInput" type="text" placeholder="只输入数字或简单表达式，例如不止一个解回答 12,15 或 需要特殊符号 -1/6">
+        </div>
+
+        <div class="progress-bar">
+            <div id="progress" class="progress-fill"></div>
+        </div>
+        <div class="cooldown-bar">
+            <div id="cooldown" class="cooldown-fill"></div>
+        </div>
+
+        <div id="message"></div>
+
+        <div class="controls">
+            <button id="startBtn" class="small">开始答题</button>
+            <button id="continueBtn" class="small" style="display:none">继续</button>
+            <button id="resetBtn" class="small">重置进度</button>
+        </div>
+        <div class="test-buttons">
+            <button class="small" onclick="score=299; level=2; updateStats(); alert('已设置到HARD难度上限')">
+                测试HARD→SADISTIC
+            </button>
+            <button class="small" onclick="score=350; level=3; updateStats(); alert('已设置到SADISTIC难度')">
+                测试SADISTIC
+            </button>
+        </div>
+
+
+
+        <!-- 修改统计区域，添加展开/收起功能 -->
+        <div id="statsSection" style="display:none; position: absolute; right: 20px; bottom: 20px; text-align: right;">
+            <button id="showStatsBtn" onclick="toggleStats()" class="small">📊 查看本题统计</button>
+            <div id="statsResult" style="margin-top:8px; max-width: 300px; text-align: left; display: none;"></div>
+        </div>
+
+
+        <!-- 历史最高记录（网页右上角浮动，合并全局+用户） -->
+        <div id="highestRecords" style="
+    position: fixed;
+    top: 10px;
+    right: 20px;
+    display: flex;
+    gap: 60px;
+    background: #f9f9f9;
+    padding: 12px 18px;
+    border-radius: 10px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    z-index: 999;
+    font-size: 14px;
+    line-height: 1.6;
+    min-width: 260px; /* 👈 更宽一些 */
+">
+
+            <!-- 修改右上角悬浮窗 -->
+            <div id="recordsPanel" style="display: flex; gap: 30px;">
+                <div class="record-section">
+                    <h4>📊 我的当前记录</h4>
+                    <div class="record-item">
+                        <span>当前分数:</span>
+                        <span id="userCurrentScore">0</span>
+                    </div>
+                    <div class="record-item">
+                        <span>最高连对:</span>
+                        <span id="userMaxStreak">0</span>
+                    </div>
+                    <div class="record-item">
+                        <span>当前正确率:</span>
+                        <span id="userCurrentAccuracy">0%</span>
+                    </div>
+                </div>
+
+                <div class="record-section">
+                    <h4>🏆 全局最高记录</h4>
+                    <div class="record-item">
+                        <span>最高分数:</span>
+                        <span id="globalMaxScore">0</span>
+                    </div>
+                    <div class="record-item">
+                        <span>最高连对:</span>
+                        <span id="globalMaxStreak">0</span>
+                    </div>
+                    <div class="record-item">
+                        <span>最高正确率:</span>
+                        <span id="globalMaxAccuracy">0%</span>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- 保留其他内联脚本（例如 MathJax），使用静态文件实现 -->
+            <script>
+                window.MathJax = {
+                    tex: {
+                        inlineMath: [['$', '$'], ['\\(', '\\)']],
+                        displayMath: [['$$', '$$'], ['\\[', '\\]']]
+                    },
+                    svg: { fontCache: 'global' }
+                };
+            </script>
+            <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js" async></script>
+
+            <!-- 左右公式图片 -->
+            <img id="leftFormula" class="formula-img" />
+            <img id="rightFormula" class="formula-img" />
+
+
+
+
+            <!-- 在body结束前添加管理员面板 -->
+            <div id="adminOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999;
+"></div>
+
+            <div id="adminPanel"
+                style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 1000; width: 300px;">
+                <h3 style="margin-top: 0;">🔧 管理员功能</h3>
+                <button onclick="cleanupLeaderboard()" class="small"
+                    style="width: 100%; margin-bottom: 10px;">清理不达标数据</button>
+                <button onclick="keepTop10Only()" class="small" style="width: 100%; margin-bottom: 10px;">🎯
+                    只保留前10名</button>
+                <div id="cleanupResult" style="font-size: 12px; min-height: 16px; margin-bottom: 10px;
+"></div>
+                <button onclick="hideAdminPanel()" class="small" style="width: 100%">关闭</button>
+            </div>
+
+            <script src="/static/js/statistics-chart.js"></script>
+            <script src="/static/js/script.js"></script>
+            <script src="/static/js/animation-system.js"></script>
+
+            <!-- 粒子效果控制面板 -->
+            <div id="particles-control-panel" class="particles-control-panel">
+                <div class="panel-header">
+                    <h3>🎯 粒子效果控制面板</h3>
+                    <button id="toggleParticlesPanel" class="toggle-btn">▲</button>
+                </div>
+
+                <div class="panel-content">
+                    <div class="control-sections">
+                        <!-- 粒子数量控制 -->
+                        <div class="control-section">
+                            <h4>粒子设置</h4>
+                            <div class="control-group">
+                                <label>粒子数量: <span id="particlesValue">80</span></label>
+                                <input type="range" id="particlesNumber" min="10" max="500" value="80" class="slider">
+                            </div>
+
+                            <div class="control-group">
+                                <label>粒子大小: <span id="sizeValue">3</span></label>
+                                <input type="range" id="particlesSize" min="1" max="20" value="3" step="0.5"
+                                    class="slider">
+                            </div>
+
+                            <div class="control-group">
+                                <label>移动速度: <span id="speedValue">2</span></label>
+                                <input type="range" id="particlesSpeed" min="0" max="10" value="2" step="0.5"
+                                    class="slider">
+                            </div>
+                        </div>
+
+                        <!-- 外观控制 -->
+                        <div class="control-section">
+                            <h4>外观设置</h4>
+                            <div class="control-group">
+                                <label>粒子颜色:</label>
+                                <input type="color" id="particlesColor" value="#ffffff" class="color-picker">
+                            </div>
+
+                            <div class="control-group">
+                                <label>透明度: <span id="opacityValue">0.5</span></label>
+                                <input type="range" id="particlesOpacity" min="0" max="1" value="0.5" step="0.1"
+                                    class="slider">
+                            </div>
+
+                            <div class="control-group checkbox-group">
+                                <input type="checkbox" id="randomSize" checked>
+                                <label for="randomSize">随机大小</label>
+                            </div>
+                        </div>
+
+                        <!-- 连线控制 -->
+                        <div class="control-section">
+                            <h4>连线设置</h4>
+                            <div class="control-group checkbox-group">
+                                <input type="checkbox" id="enableLines" checked>
+                                <label for="enableLines">启用连线</label>
+                            </div>
+
+                            <div class="control-group">
+                                <label>连线距离: <span id="distanceValue">150</span></label>
+                                <input type="range" id="lineDistance" min="50" max="300" value="150" class="slider">
+                            </div>
+
+                            <div class="control-group">
+                                <label>连线宽度: <span id="widthValue">1</span></label>
+                                <input type="range" id="lineWidth" min="0.5" max="5" value="1" step="0.5"
+                                    class="slider">
+                            </div>
+
+                            <div class="control-group">
+                                <label>连线颜色:</label>
+                                <input type="color" id="lineColor" value="#ffffff" class="color-picker">
+                            </div>
+                        </div>
+
+                        <!-- 交互控制 -->
+                        <div class="control-section">
+                            <h4>交互设置</h4>
+                            <div class="control-group checkbox-group">
+                                <input type="checkbox" id="enableHover" checked>
+                                <label for="enableHover">悬停交互</label>
+                            </div>
+
+                            <div class="control-group checkbox-group">
+                                <input type="checkbox" id="enableClick" checked>
+                                <label for="enableClick">点击交互</label>
+                            </div>
+
+                            <div class="control-group">
+                                <label>交互模式:</label>
+                                <select id="interactionMode" class="mode-select">
+                                    <option value="repulse">排斥</option>
+                                    <option value="attract">吸引</option>
+                                    <option value="bubble">气泡</option>
+                                </select>
+                            </div>
+
+                            <!-- 新增：悬停影响范围 -->
+                            <div class="control-group">
+                                <label>悬停范围: <span id="hoverDistanceValue">200</span>px</label>
+                                <input type="range" id="hoverDistance" min="50" max="500" value="200" class="slider">
+                            </div>
+
+                            <!-- 新增：悬停连线开关 -->
+                            <div class="control-group checkbox-group" style="display: none;">
+                                <input type="checkbox" id="enableHoverLines" checked>
+                                <label for="enableHoverLines">悬停连线</label>
+                            </div>
+
+                            <!-- 新增：悬停连线颜色 -->
+                            <div class="control-group" style="display: none;">
+                                <label>悬停连线颜色:</label>
+                                <input type="color" id="hoverLineColor" value="#ff4444" class="color-picker">
+                            </div>
+                        </div>
+
+
+                        <!-- 预设效果 -->
+                        <div class="control-section">
+                            <h4>预设效果</h4>
+                            <!-- FPS显示 -->
+                            <div class="fps-display">
+                                <span>FPS: </span>
+                                <span id="fpsValue">60</span>
+                            </div>
+                            <div class="preset-buttons">
+                                <button class="preset-btn" style="display: none;" data-preset="default">默认</button>
+                                <button class="preset-btn" style="display: none;" data-preset="stars">星空</button>
+                                <button class="preset-btn" style="display: none;" data-preset="network">网络</button>
+                                <button class="preset-btn" style="display: none;" data-preset="snow">雪花</button>
+                                <button class="preset-btn" style="display: none;" data-preset="fireworks">烟花</button>
+                                <button class="preset-btn" style="display: none;" data-preset="disco">迪斯科</button>
+                            </div>
+
+                            <div class="control-group">
+                                <button id="resetParticles" class="control-btn">重置配置</button>
+                                <button id="toggleParticles" class="control-btn">隐藏粒子</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</body>
+
+</html>
