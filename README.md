@@ -1,9 +1,12 @@
 # Intelligent Quiz Game Platform
 
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
-![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)
+![Python](https://img.shields.io/badge/Python-3.10%2B-yellow.svg)
 ![Flask](https://img.shields.io/badge/Flask-Web_Framework-blue.svg)
-![Status](https://img.shields.io/badge/Status-Active-brightgreen)
+[![Stars](https://img.shields.io/github/stars/anAndyTechEnthusiast/quizrush?style=flat-square)](https://github.com/anAndyTechEnthusiast/quizrush/stargazers)
+[![Forks](https://img.shields.io/github/forks/anAndyTechEnthusiast/quizrush?style=flat-square)](https://github.com/anAndyTechEnthusiast/quizrush/network/members)
+[![Issues](https://img.shields.io/github/issues/anAndyTechEnthusiast/quizrush?style=flat-square)](https://github.com/anAndyTechEnthusiast/quizrush/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/anAndyTechEnthusiast/quizrush?style=flat-square)](https://github.com/anAndyTechEnthusiast/quizrush/commits/main)
 
 This is a full-stack quiz web application built using **Flask**, **SQLite**, and modern **JavaScript**.  
 It features a multi-difficulty question system, user accounts, animations, scoring logic, analytics, and a particle-based background.
@@ -30,6 +33,12 @@ Released under the **GNU GPL-3.0 License** (FSF-recommended).
 - Modular backend structure with environment-based configuration
 - Lightweight, portable SQLite database
 - 100% open-source and community-friendly
+
+---
+
+## 📌 Repository
+
+**GitHub:** https://github.com/anAndyTechEnthusiast/quizrush
 
 ---
 
