@@ -1,0 +1,43 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+env/
+venv/
+ENV/
+
+# Environment variable files (DO NOT COMMIT SECRETS)
+.env
+environmentVariable.env
+.env.*
+!.env.example
+
+# Database files
+*.db
+*.sqlite3
+*.sqlite
+
+# Logs
+*.log
+
+# IDE/editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+
+# Flask debug
+.flaskenv
