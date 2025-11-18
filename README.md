@@ -1,9 +1,9 @@
+# Intelligent Quiz Game Platform
+
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Python](https://img.shields.io/badge/Python-3.10+-yellow.svg)
 ![Flask](https://img.shields.io/badge/Flask-Web_Framework-blue.svg)
 ![Status](https://img.shields.io/badge/Status-Active-brightgreen)
-
-# Intelligent Quiz Game Platform
 
 This is a full-stack quiz web application built using **Flask**, **SQLite**, and modern **JavaScript**.  
 It features a multi-difficulty question system, user accounts, animations, scoring logic, analytics, and a particle-based background.
