@@ -10,12 +10,12 @@ The format is inspired by [Keep a Changelog](https://keepachangelog.com/) and th
 
 ### Planned
 - Add more question categories and difficulty levels
-- Improve statistics visualization and charts
+- Debug on the website
 - Polish UI and animation controls
 
 ---
 
-## [1.0.0] - 2024-XX-XX
+## [1.0.0] - 2025-10-25
 
 ### Added
 - Core quiz game logic with multiple difficulty levels
